@@ -1,0 +1,21 @@
+# Virtual environments and Python cache
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Secrets
+.env
+
+# ECG datasets
+data/
+
+# Large generated model files
+*.keras
+*.h5
+*.pt
+*.pth
+*.npz
+
+# Generated model outputs
+outputs/models/

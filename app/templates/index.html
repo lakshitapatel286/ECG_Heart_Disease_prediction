@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>ECG Heart Disease Prediction</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+ body{font-family:Segoe UI,Arial,sans-serif;background:#f4f6f9;margin:0;color:#222}
+ header{background:#1f3a5f;color:#fff;padding:18px 32px} header h1{margin:0;font-size:22px} header p{margin:4px 0 0;font-size:13px;opacity:.8}
+ main{max-width:1000px;margin:24px auto;padding:0 16px}
+ .card{background:#fff;border-radius:10px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+ button{background:#1f3a5f;color:#fff;border:0;padding:9px 16px;border-radius:6px;cursor:pointer;margin-right:6px}
+ button.alt{background:#6c7a89}
+ .bad{color:#c0392b}.good{color:#1e8449}.err{background:#fdecea;color:#b71c1c;padding:10px;border-radius:6px}
+ table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:7px;border-bottom:1px solid #eee;text-align:left}
+ img{max-width:100%} .note{font-size:12px;color:#666}
+</style></head><body>
+<header><h1>Heart Disease Prediction from ECG</h1><p>Hybrid CNN-BiLSTM-Transformer with SHAP explainability</p></header>
+<main>
+{% if not ready %}
+ <div class="card err">No trained model found. Run <b>main.py</b> first (e.g. <code>python main.py --demo --epochs 3</code>), then reload this page.</div>
+{% else %}
+ <div class="card">
+  <h3>Analyse an ECG</h3>
+  <form method="post" enctype="multipart/form-data">
+   <input type="file" name="ecg" accept=".npy,.csv" required>
+   <button type="submit">Predict</button>
+   <p class="note">Upload a .npy or .csv file: 12 leads x 1000 samples (10 s at 100 Hz), either orientation.</p>
+  </form>
+  <form method="post"><span class="note">No file? Try a synthetic sample (demo only): </span>
+   <button class="alt" name="demo" value="normal">Synthetic normal</button><button class="alt" name="demo" value="abnormal">Synthetic abnormal</button></form>
+ </div>
+ {% if error %}<div class="card err">{{ error }}</div>{% endif %}
+ {% if result %}
+ <div class="card">
+  <h3>Result for {{ result.file }}</h3>
+  <p style="font-size:22px">Prediction: <b class="{{ 'bad' if result.label != 'Normal' else 'good' }}">{{ result.label }}</b>
+     &nbsp; (probability of heart disease: {{ result.prob }}%)</p>
+  <p>Most influential leads (SHAP): <b>{{ result.top|join(', ') }}</b></p>
+  <img src="data:image/png;base64,{{ result.ecg_img }}"><img src="data:image/png;base64,{{ result.shap_img }}">
+  <p class="note">Research prototype - not a medical device and not a substitute for a clinician.</p>
+ </div>
+ {% endif %}
+{% endif %}
+ <div class="card"><h3>Inspection history</h3>
+ <table><tr><th>Time</th><th>File</th><th>Prediction</th><th>Prob. (%)</th><th>Top leads</th></tr>
+ {% for r in history %}<tr><td>{{ r[0] }}</td><td>{{ r[1] }}</td><td>{{ r[2] }}</td><td>{{ r[3] }}</td><td>{{ r[4] }}</td></tr>
+ {% else %}<tr><td colspan="5" class="note">No predictions yet.</td></tr>{% endfor %}</table></div>
+</main></body></html>
